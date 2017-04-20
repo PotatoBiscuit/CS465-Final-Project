@@ -1,4 +1,4 @@
-package appserver.job;
+package job;
 
 /**
  * Class [UnknownToolException] Exception that is raised when an unknown tool is encountered

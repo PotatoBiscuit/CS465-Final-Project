@@ -1,4 +1,4 @@
-package appserver.job;
+package job;
 
 /**
  * Interface [Tool]

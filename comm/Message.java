@@ -1,4 +1,4 @@
-package appserver.comm;
+package comm;
 
 import java.io.Serializable;
 
