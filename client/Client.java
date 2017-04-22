@@ -15,6 +15,7 @@ import java.lang.Math;
 public class Client extends Thread implements MessageTypes{
 	String serverIP = null;
 	int serverPort = 0;
+	int transID = 0;
 	
 	public Client(String serverPropertiesFile){
 		try{
@@ -30,30 +31,51 @@ public class Client extends Thread implements MessageTypes{
 	
 	public void run(){
 		try { 
-            // connect to application server
+            // Send open transaction request
             Socket server = new Socket(serverIP, serverPort);
 			ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
 			ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
 			
-			Random generator = new Random();
-			Integer number = new Integer(Math.abs(generator.nextInt() % 10));
-            
-            // create job and job request message
-            Job job = new Job("", number);
-            Message message = new Message(READ_REQUEST, job);
-            
-            // sending job out to the application server in a message
-            writeToNet.writeObject(message);
+			Message message = new Message(OPEN_TRANS, new Job("", null));
 			
+			writeToNet.writeObject(message);
+			//-------------------------------------------
+			for(int i = 0; i < 2; i++){
+				//Send read request
+				Random generator = new Random();
+				Integer number = new Integer(Math.abs(generator.nextInt() % 10));
+				
+				// create job and job request message
+				message = new Message(READ_REQUEST, new Job("", number));
+				
+				server = new Socket(serverIP, serverPort);
+				writeToNet = new ObjectOutputStream(server.getOutputStream());
+				readFromNet = new ObjectInputStream(server.getInputStream());
+				
+				// sending job out to the application server in a message
+				writeToNet.writeObject(message);
+				//--------------------------------------------
+				
+				//Send write request
+				server = new Socket(serverIP, serverPort);
+				writeToNet = new ObjectOutputStream(server.getOutputStream());
+				readFromNet = new ObjectInputStream(server.getInputStream());
+				
+				// job request message
+				message = new Message(WRITE_REQUEST, new Job("", number));
+				
+				// sending job out to the application server in a message
+				writeToNet.writeObject(message);
+			}
+			//---------------------------------------------
+			
+			//Send close transaction request
 			server = new Socket(serverIP, serverPort);
 			writeToNet = new ObjectOutputStream(server.getOutputStream());
 			readFromNet = new ObjectInputStream(server.getInputStream());
-            
-            // job request message
-            message = new Message(WRITE_REQUEST, job);
-            
-            // sending job out to the application server in a message
-            writeToNet.writeObject(message);
+			
+			message = new Message(CLOSE_TRANS, new Job("", null));
+			writeToNet.writeObject(message);
 			
 		}catch (Exception ex) {
             System.err.println("[PlusOneClient.run] Error occurred");
@@ -62,7 +84,7 @@ public class Client extends Thread implements MessageTypes{
 	}
 	
 	public static void main(String args[]){
-		for(int i = 0; i < 20; i++){
+		for(int i = 0; i < 10; i++){
 			if(args.length == 1){
 				(new Client(args[0])).start();
 			}else{

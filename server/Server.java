@@ -3,6 +3,8 @@ package server;
 import comm.Message;
 import static comm.MessageTypes.READ_REQUEST;
 import static comm.MessageTypes.WRITE_REQUEST;
+import static comm.MessageTypes.OPEN_TRANS;
+import static comm.MessageTypes.CLOSE_TRANS;
 import comm.ConnectivityInfo;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,6 +15,7 @@ import java.lang.String;
 import java.lang.Integer;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Hashtable;
 import job.Job;
 
 //Made by Erik Dixon and Michael Ortega
@@ -76,8 +79,26 @@ public class Server{
 					System.out.println("A client has sent a write request for account: " +
 						((Integer) ((Job) message.getContent()).getParameters()).intValue());
 					break;
+				case OPEN_TRANS:
+					System.out.println("A client has sent an open transaction request");
+					break;
+				case CLOSE_TRANS:
+					System.out.println("A client has sent a close transaction request");
+					break;
 			}
 		}
+	}
+	
+	public class DataManager{
+		
+	}
+	
+	public class LockManager{
+		
+	}
+	
+	public class TransactionManager{
+		Hashtable existingTrans;
 	}
 	
 	public static void main(String args[]){
