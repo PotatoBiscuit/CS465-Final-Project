@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.net.Socket;
 import java.util.Random;
 import java.lang.Math;
+import java.util.concurrent.TimeUnit;
 
 public class Client extends Thread implements MessageTypes{
 	String serverIP = null;
@@ -39,6 +40,9 @@ public class Client extends Thread implements MessageTypes{
 			Message message = new Message(OPEN_TRANS, new Job("", null));
 			
 			writeToNet.writeObject(message);
+			Integer transaction = (Integer) readFromNet.readObject();
+			transID = transaction.intValue();
+			System.out.println("I received a Transaction ID of: " + transID);
 			//-------------------------------------------
 			for(int i = 0; i < 2; i++){
 				//Send read request
@@ -46,7 +50,7 @@ public class Client extends Thread implements MessageTypes{
 				Integer number = new Integer(Math.abs(generator.nextInt() % 10));
 				
 				// create job and job request message
-				message = new Message(READ_REQUEST, new Job("", number));
+				message = new Message(READ_REQUEST, new Job(Integer.toString(transID), number));
 				
 				server = new Socket(serverIP, serverPort);
 				writeToNet = new ObjectOutputStream(server.getOutputStream());
@@ -62,7 +66,7 @@ public class Client extends Thread implements MessageTypes{
 				readFromNet = new ObjectInputStream(server.getInputStream());
 				
 				// job request message
-				message = new Message(WRITE_REQUEST, new Job("", number));
+				message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number));
 				
 				// sending job out to the application server in a message
 				writeToNet.writeObject(message);
@@ -74,7 +78,7 @@ public class Client extends Thread implements MessageTypes{
 			writeToNet = new ObjectOutputStream(server.getOutputStream());
 			readFromNet = new ObjectInputStream(server.getInputStream());
 			
-			message = new Message(CLOSE_TRANS, new Job("", null));
+			message = new Message(CLOSE_TRANS, new Job(Integer.toString(transID), null));
 			writeToNet.writeObject(message);
 			
 		}catch (Exception ex) {
@@ -83,13 +87,14 @@ public class Client extends Thread implements MessageTypes{
         }
 	}
 	
-	public static void main(String args[]){
+	public static void main(String args[]) throws InterruptedException{
 		for(int i = 0; i < 10; i++){
 			if(args.length == 1){
 				(new Client(args[0])).start();
 			}else{
 				System.err.println("No server.properties files given");
 			}
+			//TimeUnit.SECONDS.sleep(2);
 		}
 	}
 }

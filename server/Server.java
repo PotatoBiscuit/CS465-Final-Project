@@ -15,14 +15,19 @@ import java.lang.String;
 import java.lang.Integer;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Hashtable;
+import java.util.ArrayList;
 import job.Job;
+import java.util.Random;
+import java.lang.Math;
 
 //Made by Erik Dixon and Michael Ortega
 public class Server{
 	static ServerSocket serverSocket = null;
+	TransactionManager transManager;
+	LockManager lockManager;
 	
 	public Server(String serverPropertiesFile){
+		transManager = new TransactionManager();
 		try{
 			// read server port from server properties file
 			int serverPort = 0;
@@ -64,27 +69,33 @@ public class Server{
 				readFromNet = new ObjectInputStream(client.getInputStream());
 				writeToNet = new ObjectOutputStream(client.getOutputStream());
 				message = (Message) readFromNet.readObject();
+			
+				switch(message.getType()){
+					case READ_REQUEST:
+						System.out.println("Client " + ((Job) message.getContent()).getToolName() +
+							" has sent a read request for account: " +
+							((Integer) ((Job) message.getContent()).getParameters()).intValue());
+						break;
+					case WRITE_REQUEST:
+						System.out.println("Client " + ((Job) message.getContent()).getToolName() + 
+							" has sent a write request for account: " +
+							((Integer) ((Job) message.getContent()).getParameters()).intValue());
+						break;
+					case OPEN_TRANS:
+						Integer response = new Integer(transManager.createTransaction());
+						System.out.println("A client has sent an open transaction request. ID: " + response.intValue());
+						writeToNet.writeObject(response);
+						break;
+					case CLOSE_TRANS:
+						System.out.println("Client " + ((Job) message.getContent()).getToolName() +
+							" has sent a close transaction request");
+						transManager.closeTransaction(Integer.parseInt(((Job) message.getContent()).getToolName()));
+						break;
+				}
 			}catch(IOException e){
 				System.err.println("Error: " + e);
 			}catch(ClassNotFoundException e){
 				System.err.println("Error: " + e);
-			}
-			
-			switch(message.getType()){
-				case READ_REQUEST:
-					System.out.println("A client has sent a read request for account: " +
-						((Integer) ((Job) message.getContent()).getParameters()).intValue());
-					break;
-				case WRITE_REQUEST:
-					System.out.println("A client has sent a write request for account: " +
-						((Integer) ((Job) message.getContent()).getParameters()).intValue());
-					break;
-				case OPEN_TRANS:
-					System.out.println("A client has sent an open transaction request");
-					break;
-				case CLOSE_TRANS:
-					System.out.println("A client has sent a close transaction request");
-					break;
 			}
 		}
 	}
@@ -98,7 +109,28 @@ public class Server{
 	}
 	
 	public class TransactionManager{
-		Hashtable existingTrans;
+		ArrayList existingTrans;
+		
+		public TransactionManager(){
+			existingTrans = new ArrayList();
+		}
+		
+		public synchronized int createTransaction(){
+			Random idGen = new Random();
+			int transID;
+			while(true){
+				transID = Math.abs(idGen.nextInt());
+				if(!existingTrans.contains(transID)) break;
+			}
+			existingTrans.add(transID);
+			return transID;
+		}
+		
+		public synchronized void closeTransaction(int transID){
+			existingTrans.remove(Integer.valueOf(transID));
+			//TO BE IMPLEMENTED
+			//lockManager.release(transID)
+		}
 	}
 	
 	public static void main(String args[]){
