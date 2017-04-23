@@ -18,7 +18,7 @@ public class Client extends Thread implements MessageTypes{
 	int serverPort = 0;
 	int transID = 0;
 	
-	public Client(String serverPropertiesFile){
+	public Client(String serverPropertiesFile){	//Gather server info connection data
 		try{
 			// read server port from server properties file
 			BufferedReader serverFile = new BufferedReader(new FileReader(serverPropertiesFile));
@@ -32,7 +32,7 @@ public class Client extends Thread implements MessageTypes{
 	
 	public void run(){
 		try { 
-            // Send open transaction request
+            //SEND OPEN TRANSACTION REQUEST
             Socket server = new Socket(serverIP, serverPort);
 			ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
 			ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
@@ -45,7 +45,7 @@ public class Client extends Thread implements MessageTypes{
 			System.out.println("I received a Transaction ID of: " + transID);
 			//-------------------------------------------
 			for(int i = 0; i < 2; i++){
-				//Send read request
+				//SEND READ REQUEST
 				Random generator = new Random();
 				Integer number = new Integer(Math.abs(generator.nextInt() % 10));
 				
@@ -60,7 +60,7 @@ public class Client extends Thread implements MessageTypes{
 				writeToNet.writeObject(message);
 				//--------------------------------------------
 				
-				//Send write request
+				//SEND WRITE REQUEST
 				server = new Socket(serverIP, serverPort);
 				writeToNet = new ObjectOutputStream(server.getOutputStream());
 				readFromNet = new ObjectInputStream(server.getInputStream());
@@ -73,7 +73,7 @@ public class Client extends Thread implements MessageTypes{
 			}
 			//---------------------------------------------
 			
-			//Send close transaction request
+			//SEND CLOSE TRANSACTION REQUEST
 			server = new Socket(serverIP, serverPort);
 			writeToNet = new ObjectOutputStream(server.getOutputStream());
 			readFromNet = new ObjectInputStream(server.getInputStream());
@@ -88,7 +88,7 @@ public class Client extends Thread implements MessageTypes{
 	}
 	
 	public static void main(String args[]) throws InterruptedException{
-		for(int i = 0; i < 10; i++){
+		for(int i = 0; i < 10; i++){	//Create client threads that assault server with requests and messages
 			if(args.length == 1){
 				(new Client(args[0])).start();
 			}else{
