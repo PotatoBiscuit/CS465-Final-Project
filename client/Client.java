@@ -32,12 +32,12 @@ public class Client extends Thread implements MessageTypes{
 	
 	public void run(){
 		try { 
-            //SEND OPEN TRANSACTION REQUEST
-            Socket server = new Socket(serverIP, serverPort);
+            		//SEND OPEN TRANSACTION REQUEST
+            	Socket server = new Socket(serverIP, serverPort);
 			ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
 			ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
 			
-			Message message = new Message(OPEN_TRANS, new Job("", null));
+			Message message = new Message(CREATE_TRANS, new Job("", null));
 			
 			writeToNet.writeObject(message);
 			Integer transaction = (Integer) readFromNet.readObject();

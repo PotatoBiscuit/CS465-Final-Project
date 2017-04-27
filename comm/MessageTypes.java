@@ -11,6 +11,6 @@ public interface MessageTypes {
     
     public static int READ_REQUEST = 1;
     public static int WRITE_REQUEST = 2;
-	public static int OPEN_TRANS = 3;
-	public static int CLOSE_TRANS = 4;
+    public static int CREATE_TRANS = 3;
+    public static int CLOSE_TRANS = 4;
 }

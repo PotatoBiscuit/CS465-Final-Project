@@ -3,7 +3,7 @@ package server;
 import comm.Message;
 import static comm.MessageTypes.READ_REQUEST;
 import static comm.MessageTypes.WRITE_REQUEST;
-import static comm.MessageTypes.OPEN_TRANS;
+import static comm.MessageTypes.CREATE_TRANS;
 import static comm.MessageTypes.CLOSE_TRANS;
 import comm.ConnectivityInfo;
 import java.io.IOException;
@@ -23,8 +23,8 @@ import java.lang.Math;
 //Made by Erik Dixon and Michael Ortega
 public class Server{
 	static ServerSocket serverSocket = null;	//Server socket for conn to client
-	TransactionManager transManager;			//Transaction Manager
-	LockManager lockManager;					//Lock Manager
+	TransactionManager transManager;		//Transaction Manager
+	LockManager lockManager;			//Lock Manager
 	
 	public Server(String serverPropertiesFile){
 		transManager = new TransactionManager();	//Initialize transaction manager
@@ -56,8 +56,8 @@ public class Server{
 	private class ServerThread extends Thread{
 		Socket client = null;	//Socket of client
 		ObjectInputStream readFromNet = null;	//Streams for reading and writing with client
-        ObjectOutputStream writeToNet = null;
-		Message message = null;					//Message container
+        	ObjectOutputStream writeToNet = null;
+		Message message = null;			//Message container
 		
 		private ServerThread(Socket client){
 			this.client = client;
@@ -81,7 +81,7 @@ public class Server{
 							" has sent a write request for account: " +
 							((Integer) ((Job) message.getContent()).getParameters()).intValue());
 						break;
-					case OPEN_TRANS:	//If request to open transaction, give client a new Transaction ID
+					case CREATE_TRANS:	//If request to open transaction, give client a new Transaction ID
 						Integer response = new Integer(transManager.createTransaction());
 						System.out.println("A client has sent an open transaction request. ID: " + response.intValue());
 						writeToNet.writeObject(response);
@@ -103,6 +103,7 @@ public class Server{
 	public class DataManager{	//Skeleton DataManager class
 		
 		public DataManager(){
+			
 			;
 		}
 	}
