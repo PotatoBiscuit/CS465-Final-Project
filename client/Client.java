@@ -33,53 +33,15 @@ public class Client extends Thread implements MessageTypes{
 	public void run(){
 		try { 
             		//SEND OPEN TRANSACTION REQUEST
-            	Socket server = new Socket(serverIP, serverPort);
-			ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
-			ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
-			
-			Message message = new Message(CREATE_TRANS, new Job("", null));
-			
-			writeToNet.writeObject(message);
-			Integer transaction = (Integer) readFromNet.readObject();
-			transID = transaction.intValue();
-			System.out.println("I received a Transaction ID of: " + transID);
+
 			//-------------------------------------------
 			for(int i = 0; i < 2; i++){
-				//SEND READ REQUEST
-				Random generator = new Random();
-				Integer number = new Integer(Math.abs(generator.nextInt() % 10));
-				
-				// create job and job request message
-				message = new Message(READ_REQUEST, new Job(Integer.toString(transID), number));
-				
-				server = new Socket(serverIP, serverPort);
-				writeToNet = new ObjectOutputStream(server.getOutputStream());
-				readFromNet = new ObjectInputStream(server.getInputStream());
-				
-				// sending job out to the application server in a message
-				writeToNet.writeObject(message);
-				//--------------------------------------------
-				
-				//SEND WRITE REQUEST
-				server = new Socket(serverIP, serverPort);
-				writeToNet = new ObjectOutputStream(server.getOutputStream());
-				readFromNet = new ObjectInputStream(server.getInputStream());
-				
-				// job request message
-				message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number));
-				
-				// sending job out to the application server in a message
-				writeToNet.writeObject(message);
+				//WITHDRAWAL
+				//DEPOSIT
 			}
 			//---------------------------------------------
 			
 			//SEND CLOSE TRANSACTION REQUEST
-			server = new Socket(serverIP, serverPort);
-			writeToNet = new ObjectOutputStream(server.getOutputStream());
-			readFromNet = new ObjectInputStream(server.getInputStream());
-			
-			message = new Message(CLOSE_TRANS, new Job(Integer.toString(transID), null));
-			writeToNet.writeObject(message);
 			
 		}catch (Exception ex) {
             System.err.println("[PlusOneClient.run] Error occurred");

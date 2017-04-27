@@ -32,25 +32,6 @@ public class ClientAux extends Thread implements MessageTypes{
 			System.err.println("Error: " + e);
 		}
 	}
-	
-	public void run(){
-		try { 
-            		//SEND OPEN TRANSACTION REQUEST
-            		
-			//-------------------------------------------
-			for(int i = 0; i < 2; i++){
-				
-			}
-			//---------------------------------------------
-			
-			//SEND CLOSE TRANSACTION REQUEST
-			
-			
-		}catch (Exception ex) {
-            System.err.println("[PlusOneClient.run] Error occurred");
-            ex.printStackTrace();
-        }
-	}
 
 	public void openTransaction() throws IOException, ClassNotFoundException{
 		server = new Socket(serverIP, serverPort);
@@ -70,7 +51,9 @@ public class ClientAux extends Thread implements MessageTypes{
 		writeToNet.writeObject(message);
 	}
 
-	public Integer Withdrawal() throws IOException{
+	public int Withdrawal() throws IOException{
+		//ACTUALLY REMOVING MONEY TO BE IMPLEMENTED
+
 		//SEND READ REQUEST
 		Random generator = new Random();
 		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
@@ -95,15 +78,33 @@ public class ClientAux extends Thread implements MessageTypes{
 
 		return number;
 	}
-	
-	public static void main(String args[]) throws InterruptedException{
-		for(int i = 0; i < 10; i++){	//Create client threads that assault server with requests and messages
-			if(args.length == 1){
-				(new Client(args[0])).start();
-			}else{
-				System.err.println("No server.properties files given");
-			}
-			//TimeUnit.SECONDS.sleep(2);
-		}
+
+	public Deposit(int cash) throws IOException{
+		Random generator = new Random();
+		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
+
+		//SEND READ REQUEST
+		Random generator = new Random();
+		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
+				
+		// create job and job request message
+		Message message = new Message(READ_REQUEST, new Job(Integer.toString(transID), number));
+				
+		// sending job out to the application server in a message
+		writeToNet.writeObject(message);
+
+		// ADD CASH TO AMOUNT READ THEN WRITE IT IN
+		//--------------------------------------------
+				
+		//SEND WRITE REQUEST
+		server = new Socket(serverIP, serverPort);
+		writeToNet = new ObjectOutputStream(server.getOutputStream());
+		readFromNet = new ObjectInputStream(server.getInputStream());
+				
+		// job request message
+		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number));
+				
+		// sending job out to the application server in a message
+		writeToNet.writeObject(message);
 	}
 }
