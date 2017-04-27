@@ -13,5 +13,6 @@ public class Account{
 	
 	public int writeBalance(int newBalance){
 		balance = newBalance;
+		return balance;
 	}
 }

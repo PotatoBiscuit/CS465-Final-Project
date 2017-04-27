@@ -79,13 +79,13 @@ public class ClientAux extends Thread implements MessageTypes{
 		return number;
 	}
 
-	public Deposit(int cash) throws IOException{
+	public void Deposit(int cash) throws IOException{
 		Random generator = new Random();
 		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
 
 		//SEND READ REQUEST
-		Random generator = new Random();
-		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
+		generator = new Random();
+		number = new Integer(Math.abs(generator.nextInt() % 10));
 				
 		// create job and job request message
 		Message message = new Message(READ_REQUEST, new Job(Integer.toString(transID), number));

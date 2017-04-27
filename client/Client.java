@@ -32,16 +32,7 @@ public class Client extends Thread implements MessageTypes{
 	
 	public void run(){
 		try { 
-            		//SEND OPEN TRANSACTION REQUEST
-
-			//-------------------------------------------
-			for(int i = 0; i < 2; i++){
-				//WITHDRAWAL
-				//DEPOSIT
-			}
-			//---------------------------------------------
-			
-			//SEND CLOSE TRANSACTION REQUEST
+            Socket server = new Socket(serverIP, serverPort);
 			
 		}catch (Exception ex) {
             System.err.println("[PlusOneClient.run] Error occurred");

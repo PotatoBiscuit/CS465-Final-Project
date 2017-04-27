@@ -46,7 +46,7 @@ public class Server{
 		while(true) {
 			try {
 				Socket clientSocket = serverSocket.accept();	//Connect to a client
-				(new ServerThread(clientSocket)).start();		//Start thread to deal with client
+				transManager.createTransaction(clientSocket);		//Start transaction to deal with client
 			} catch(IOException e) {
 				System.out.println("Failed to establish connection: " + e);
 			}
@@ -63,7 +63,7 @@ public class Server{
 			this.client = client;
 		}
 		
-		@Override
+		/*@Override
 		public void run(){
 			try{	//Open input and output streams to client
 				readFromNet = new ObjectInputStream(client.getInputStream());
@@ -97,44 +97,11 @@ public class Server{
 			}catch(ClassNotFoundException e){
 				System.err.println("Error: " + e);
 			}
-		}
-	}
-	
-	public class DataManager{	//Skeleton DataManager class
-		
-		public DataManager(){
-			
-			;
-		}
+		}*/
 	}
 	
 	public class LockManager{	//Skeleton LockManager class
 		
-	}
-	
-	public class TransactionManager{	//Partially filled-out Transaction Manager class
-		ArrayList existingTrans;
-		
-		public TransactionManager(){	//Create list to hold transactions when TransactionManager started
-			existingTrans = new ArrayList();
-		}
-		
-		public synchronized int createTransaction(){	//Create transaction, add to transaction list
-			Random idGen = new Random();
-			int transID;
-			while(true){	//Assign unique transaction ID
-				transID = Math.abs(idGen.nextInt());
-				if(!existingTrans.contains(transID)) break;
-			}
-			existingTrans.add(transID);
-			return transID;	//Return transaction ID to later be returned to the client
-		}
-		
-		public synchronized void closeTransaction(int transID){	//Close transaction, remove from list
-			existingTrans.remove(Integer.valueOf(transID));
-			//TO BE IMPLEMENTED, releasing locks
-			//lockManager.release(transID)
-		}
 	}
 	
 	public static void main(String args[]){	//Start server with correct info, if no properties file given, show error
