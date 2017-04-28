@@ -13,11 +13,18 @@ public class Job implements Serializable{
     
     String toolName;
     Object parameters;
+	Object parameters1;
     
     public Job(String toolName, Object parameters) {
         this.toolName = toolName;
         this.parameters = parameters;
     }
+	
+	public Job(String toolName, Object parameters, Object parameters1){
+		this.toolName = toolName;
+		this.parameters = parameters;
+		this.parameters1 = parameters1;
+	}
     
     public String getToolName() {
         return toolName;
@@ -26,4 +33,8 @@ public class Job implements Serializable{
     public Object getParameters() {
         return parameters;
     }
+	
+	public Object getParameters1(){
+		return parameters1;
+	}
 }

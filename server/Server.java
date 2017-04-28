@@ -24,7 +24,6 @@ import java.lang.Math;
 public class Server{
 	static ServerSocket serverSocket = null;	//Server socket for conn to client
 	TransactionManager transManager;		//Transaction Manager
-	LockManager lockManager;			//Lock Manager
 	
 	public Server(String serverPropertiesFile){
 		transManager = new TransactionManager();	//Initialize transaction manager
@@ -51,57 +50,6 @@ public class Server{
 				System.out.println("Failed to establish connection: " + e);
 			}
 		}
-	}
-	
-	private class ServerThread extends Thread{
-		Socket client = null;	//Socket of client
-		ObjectInputStream readFromNet = null;	//Streams for reading and writing with client
-        	ObjectOutputStream writeToNet = null;
-		Message message = null;			//Message container
-		
-		private ServerThread(Socket client){
-			this.client = client;
-		}
-		
-		/*@Override
-		public void run(){
-			try{	//Open input and output streams to client
-				readFromNet = new ObjectInputStream(client.getInputStream());
-				writeToNet = new ObjectOutputStream(client.getOutputStream());
-				message = (Message) readFromNet.readObject();	//Read client message
-			
-				switch(message.getType()){
-					case READ_REQUEST:	//If read request, perform read on the specified account
-						System.out.println("Client " + ((Job) message.getContent()).getToolName() +
-							" has sent a read request for account: " +
-							((Integer) ((Job) message.getContent()).getParameters()).intValue());
-						break;
-					case WRITE_REQUEST:	//If write request, perform read on the specified account
-						System.out.println("Client " + ((Job) message.getContent()).getToolName() + 
-							" has sent a write request for account: " +
-							((Integer) ((Job) message.getContent()).getParameters()).intValue());
-						break;
-					case CREATE_TRANS:	//If request to open transaction, give client a new Transaction ID
-						Integer response = new Integer(transManager.createTransaction());
-						System.out.println("A client has sent an open transaction request. ID: " + response.intValue());
-						writeToNet.writeObject(response);
-						break;
-					case CLOSE_TRANS:	//If request to close transaction, remove transaction from server
-						System.out.println("Client " + ((Job) message.getContent()).getToolName() +
-							" has sent a close transaction request");
-						transManager.closeTransaction(Integer.parseInt(((Job) message.getContent()).getToolName()));
-						break;
-				}
-			}catch(IOException e){
-				System.err.println("Error: " + e);
-			}catch(ClassNotFoundException e){
-				System.err.println("Error: " + e);
-			}
-		}*/
-	}
-	
-	public class LockManager{	//Skeleton LockManager class
-		
 	}
 	
 	public static void main(String args[]){	//Start server with correct info, if no properties file given, show error

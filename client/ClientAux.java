@@ -21,16 +21,9 @@ public class ClientAux extends Thread implements MessageTypes{
 	ObjectOutputStream writeToNet;
 	ObjectInputStream readFromNet;
 	
-	public ClientAux(String serverPropertiesFile){	//Gather server info connection data
-		try{
-			// read server port from server properties file
-			BufferedReader serverFile = new BufferedReader(new FileReader(serverPropertiesFile));
-			serverIP = serverFile.readLine().split(":")[1].trim();
-			serverPort = Integer.parseInt(serverFile.readLine().split(":")[1].trim());
-			
-		}catch(IOException e){
-			System.err.println("Error: " + e);
-		}
+	public ClientAux(String IP, int port){	//Gather server info connection data
+		serverIP = IP;
+		serverPort = port;
 	}
 
 	public void openTransaction() throws IOException, ClassNotFoundException{
@@ -51,9 +44,9 @@ public class ClientAux extends Thread implements MessageTypes{
 		writeToNet.writeObject(message);
 	}
 
-	public int Withdrawal() throws IOException{
+	public int withdraw(int amount) throws IOException, ClassNotFoundException{
 		//ACTUALLY REMOVING MONEY TO BE IMPLEMENTED
-
+		int balance = 0;
 		//SEND READ REQUEST
 		Random generator = new Random();
 		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
@@ -63,23 +56,22 @@ public class ClientAux extends Thread implements MessageTypes{
 				
 		// sending job out to the application server in a message
 		writeToNet.writeObject(message);
+		balance = ((Integer) readFromNet.readObject()).intValue();
 		//--------------------------------------------
-				
-		//SEND WRITE REQUEST
-		server = new Socket(serverIP, serverPort);
-		writeToNet = new ObjectOutputStream(server.getOutputStream());
-		readFromNet = new ObjectInputStream(server.getInputStream());
+		System.out.println("Balance before withdraw: " + balance);
+		balance = balance - amount;
 				
 		// job request message
-		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number));
+		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number, new Integer(balance)));
 				
 		// sending job out to the application server in a message
 		writeToNet.writeObject(message);
-
-		return number;
+		balance = ((Integer) readFromNet.readObject()).intValue();
+		System.out.println("Balance after withdraw: " + balance);
+		return balance;
 	}
 
-	public void Deposit(int cash) throws IOException{
+	public void Deposit(int amount) throws IOException{
 		Random generator = new Random();
 		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
 

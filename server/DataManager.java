@@ -6,11 +6,12 @@ public class DataManager{	//Skeleton DataManager class
 	private ArrayList<Account> accountList;
 	private LockManager lockManager;
 	
-	public DataManager(LockManager newLockManager){
+	public DataManager(){
+		accountList = new ArrayList<Account>();
 		for(int i = 0; i < 10; i++){
 			accountList.add(new Account(10));
 		}
-		lockManager = newLockManager;
+		lockManager = new LockManager();
 	}
 		
 	public int readAccount(int transID, int accountNum){

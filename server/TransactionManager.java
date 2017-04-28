@@ -1,7 +1,10 @@
 package server;
 
 import comm.Message;
-import comm.MessageTypes;
+import static comm.MessageTypes.READ_REQUEST;
+import static comm.MessageTypes.WRITE_REQUEST;
+import static comm.MessageTypes.CREATE_TRANS;
+import static comm.MessageTypes.CLOSE_TRANS;
 import comm.ConnectivityInfo;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -19,9 +22,11 @@ import java.lang.Math;
 
 public class TransactionManager{
 	ArrayList<Transaction> transactionList;
+	DataManager dataManager;
 	
 	public TransactionManager(){
 		transactionList = new ArrayList<Transaction>();
+		dataManager = new DataManager();
 	}
 	
 	public synchronized int createTransaction(Socket client){	//Create transaction, add to transaction list
@@ -43,6 +48,14 @@ public class TransactionManager{
 		//lockManager.release(transID)
 	}
 	
+	public int read(int transID, int accountNum){
+		return dataManager.readAccount(transID, accountNum);
+	}
+	
+	public int write(int transID, int accountNum, int balance){
+		return dataManager.writeAccount(transID, accountNum, balance);
+	}
+	
 	public int findIndexById(int transID){
 		int index = 0;
 		for(Transaction temp : transactionList){
@@ -57,14 +70,61 @@ public class TransactionManager{
 	private class Transaction extends Thread{
 		public Socket clientSocket;
 		public int transID;
+		public ObjectInputStream readFromNet;
+		public ObjectOutputStream writeToNet;
+		public Message message;
 		
-		public Transaction(Socket client, int ID){
-			clientSocket = client;
-			transID = ID;
+		public Transaction(Socket clientSocket, int transID){
+			this.clientSocket = clientSocket;
+			this.transID = transID;
+			
+			try{
+				readFromNet = new ObjectInputStream(clientSocket.getInputStream());
+				writeToNet = new ObjectOutputStream(clientSocket.getOutputStream());
+			}catch(IOException e){
+				System.err.println("Error: " + e);
+			}
 		}
 		
 		public void run(){
-			System.out.println("Transaction " + transID + " created");
+			System.out.println("Trans: " + transID + " created!");
+			try{	//Open input and output streams to client
+				int balance = 0;
+				while(true){
+					message = (Message) readFromNet.readObject();	//Read client message
+					switch(message.getType()){
+						case READ_REQUEST:	//If read request, perform read on the specified account
+							System.out.println("Client " + ((Job) message.getContent()).getToolName() +
+								" has sent a read request for account: " +
+								((Integer) ((Job) message.getContent()).getParameters()).intValue());
+							balance = read(transID, ((Integer) ((Job) message.getContent()).getParameters()).intValue());
+							writeToNet.writeObject(new Integer(balance));
+							break;
+						case WRITE_REQUEST:	//If write request, perform read on the specified account
+							System.out.println("Client " + ((Job) message.getContent()).getToolName() + 
+								" has sent a write request for account: " +
+								((Integer) ((Job) message.getContent()).getParameters()).intValue());
+							balance = write(transID, ((Integer) ((Job) message.getContent()).getParameters()).intValue(),
+												((Integer) ((Job) message.getContent()).getParameters1()).intValue());
+							writeToNet.writeObject(new Integer(balance));
+							break;
+						case CREATE_TRANS:	//If request to open transaction, give client a new Transaction ID
+							Integer response = new Integer(transID);
+							System.out.println("A client has sent an open transaction request. ID: " + response.intValue());
+							writeToNet.writeObject(response);
+							break;
+						case CLOSE_TRANS:	//If request to close transaction, remove transaction from server
+							System.out.println("Client " + ((Job) message.getContent()).getToolName() +
+								" has sent a close transaction request");
+							closeTransaction(Integer.parseInt(((Job) message.getContent()).getToolName()));
+							return;
+					}
+				}
+			}catch(IOException e){
+				System.err.println("Error: " + e);
+			}catch(ClassNotFoundException e){
+				System.err.println("Error: " + e);
+			}
 		}
 	}
 }
