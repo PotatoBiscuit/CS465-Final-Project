@@ -39,6 +39,12 @@ public class ClientAux extends Thread implements MessageTypes{
 		System.out.println("I received a Transaction ID of: " + transID);
 	}
 
+	public void display() {
+		Message message = new Message(DISPLAY, null);
+		writeToNet.writeObject(message);
+		System.out.println("Display request sent to server.");
+	}
+
 	public void closeTransaction() throws IOException{
 		Message message = new Message(CLOSE_TRANS, new Job(Integer.toString(transID), null));	//Make a message to close the transaction
 		writeToNet.writeObject(message);	//Send the closing message to the server

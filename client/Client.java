@@ -65,7 +65,7 @@ public class Client extends Thread implements MessageTypes{
 			}else{
 				System.err.println("No server.properties files given");
 			}
-			//TimeUnit.SECONDS.sleep(2);
+			TimeUnit.SECONDS.sleep(2);
 		}
 	}
 }
