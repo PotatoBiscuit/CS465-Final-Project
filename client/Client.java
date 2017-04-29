@@ -31,16 +31,31 @@ public class Client extends Thread implements MessageTypes{
 	}
 	
 	public void run(){
+		Integer drawAccount;
+		Integer depositAccount;
 		try { 
-            ClientAux clientInterface = new ClientAux(serverIP, serverPort);
-			clientInterface.openTransaction();
-			clientInterface.withdraw(5);
+           		ClientAux clientInterface = new ClientAux(serverIP, serverPort);
+			clientInterface.createTransaction();
+			
+			Random generator = new Random();	//Randomly generate an account to withdraw from
+			drawAccount = new Integer(Math.abs(generator.nextInt() % 10));
+
+			int withdrawal = Math.abs(generator.nextInt() % 25);
+			int amount = clientInterface.Withdraw(withdrawal, drawAccount);
+
+			while (true){
+				depositAccount = new Integer(Math.abs(generator.nextInt() % 10));
+				if (depositAccount.intValue() != drawAccount.intValue())
+					break;		
+			}
+			clientInterface.Deposit(amount, depositAccount);
+
 			clientInterface.closeTransaction();
 			
 		}catch (Exception ex) {
-            System.err.println("[PlusOneClient.run] Error occurred");
-            ex.printStackTrace();
-        }
+            		System.err.println("[PlusOneClient.run] Error occurred");
+            		ex.printStackTrace();
+        	}
 	}
 	
 	public static void main(String args[]) throws InterruptedException{

@@ -26,77 +26,62 @@ public class ClientAux extends Thread implements MessageTypes{
 		serverPort = port;
 	}
 
-	public void openTransaction() throws IOException, ClassNotFoundException{
-		server = new Socket(serverIP, serverPort);
+	public void createTransaction() throws IOException, ClassNotFoundException{
+		server = new Socket(serverIP, serverPort);	//Setup the server connection and object streams
 		writeToNet = new ObjectOutputStream(server.getOutputStream());
 		readFromNet = new ObjectInputStream(server.getInputStream());
 			
-		Message message = new Message(CREATE_TRANS, new Job("", null));
+		Message message = new Message(CREATE_TRANS, new Job("", null));	//Make a message to create the transaction
 			
-		writeToNet.writeObject(message);
-		Integer transaction = (Integer) readFromNet.readObject();
+		writeToNet.writeObject(message);	//Send the create message out to the server
+		Integer transaction = (Integer) readFromNet.readObject();	//Read in the transaction message replied
 		transID = transaction.intValue();
 		System.out.println("I received a Transaction ID of: " + transID);
 	}
 
 	public void closeTransaction() throws IOException{
-		Message message = new Message(CLOSE_TRANS, new Job(Integer.toString(transID), null));
-		writeToNet.writeObject(message);
+		Message message = new Message(CLOSE_TRANS, new Job(Integer.toString(transID), null));	//Make a message to close the transaction
+		writeToNet.writeObject(message);	//Send the closing message to the server
 	}
 
-	public int withdraw(int amount) throws IOException, ClassNotFoundException{
-		//ACTUALLY REMOVING MONEY TO BE IMPLEMENTED
+	public int Withdraw(int amount, Integer account) throws IOException, ClassNotFoundException{
 		int balance = 0;
-		//SEND READ REQUEST
-		Random generator = new Random();
-		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
 				
-		// create job and job request message
-		Message message = new Message(READ_REQUEST, new Job(Integer.toString(transID), number));
+		//Create job and read request message
+		Message message = new Message(READ_REQUEST, new Job(Integer.toString(transID), account));
 				
-		// sending job out to the application server in a message
-		writeToNet.writeObject(message);
-		balance = ((Integer) readFromNet.readObject()).intValue();
+		writeToNet.writeObject(message);	//Sending message out to the application server
+		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
 		//--------------------------------------------
 		System.out.println("Balance before withdraw: " + balance);
 		balance = balance - amount;
 				
-		// job request message
-		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number, new Integer(balance)));
+		//Create write request message
+		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), account, new Integer(balance)));
 				
-		// sending job out to the application server in a message
-		writeToNet.writeObject(message);
-		balance = ((Integer) readFromNet.readObject()).intValue();
+		writeToNet.writeObject(message);	//Sending message out to the application server
+		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
 		System.out.println("Balance after withdraw: " + balance);
 		return balance;
 	}
 
-	public void Deposit(int amount) throws IOException{
-		Random generator = new Random();
-		Integer number = new Integer(Math.abs(generator.nextInt() % 10));
-
-		//SEND READ REQUEST
-		generator = new Random();
-		number = new Integer(Math.abs(generator.nextInt() % 10));
+	public void Deposit(int amount, Integer account) throws IOException, ClassNotFoundException{
+		int balance = 0;
 				
-		// create job and job request message
-		Message message = new Message(READ_REQUEST, new Job(Integer.toString(transID), number));
+		//Create job and read request message
+		Message message = new Message(READ_REQUEST, new Job(Integer.toString(transID), account));
 				
-		// sending job out to the application server in a message
-		writeToNet.writeObject(message);
-
-		// ADD CASH TO AMOUNT READ THEN WRITE IT IN
+		writeToNet.writeObject(message);	//Sending message out to the application server
+		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
 		//--------------------------------------------
+		System.out.println("Balance before deposit: " + balance);
+		balance = balance + amount;
 				
-		//SEND WRITE REQUEST
-		server = new Socket(serverIP, serverPort);
-		writeToNet = new ObjectOutputStream(server.getOutputStream());
-		readFromNet = new ObjectInputStream(server.getInputStream());
+		//Create write request message
+		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), account, new Integer(balance)));
 				
-		// job request message
-		message = new Message(WRITE_REQUEST, new Job(Integer.toString(transID), number));
-				
-		// sending job out to the application server in a message
-		writeToNet.writeObject(message);
+		writeToNet.writeObject(message);	//Sending message out to the application server
+		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
+		System.out.println("Balance after deposit: " + balance);
 	}
 }
