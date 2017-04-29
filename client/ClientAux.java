@@ -62,7 +62,7 @@ public class ClientAux extends Thread implements MessageTypes{
 		writeToNet.writeObject(message);	//Sending message out to the application server
 		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
 		System.out.println("Balance after withdraw: " + balance);
-		return balance;
+		return amount;
 	}
 
 	public void Deposit(int amount, Integer account) throws IOException, ClassNotFoundException{
