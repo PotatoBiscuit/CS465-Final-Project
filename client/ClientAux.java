@@ -39,7 +39,7 @@ public class ClientAux extends Thread implements MessageTypes{
 		System.out.println("I received a Transaction ID of: " + transID);
 	}
 
-	public void display() {
+	public void display() throws IOException{
 		Message message = new Message(DISPLAY, null);
 		writeToNet.writeObject(message);
 		System.out.println("Display request sent to server.");

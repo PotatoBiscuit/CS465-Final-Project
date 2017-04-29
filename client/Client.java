@@ -65,12 +65,19 @@ public class Client extends Thread implements MessageTypes{
 			}else{
 				System.err.println("No server.properties files given");
 			}
-			TimeUnit.SECONDS.sleep(2);
+			//TimeUnit.SECONDS.sleep(2);
 		}
-		Client displayClient = new Client(args[0]);
-		ClientAux displayClientAux = new ClientAux(displayClient.serverIP, displayClient.serverPort);
-		displayClientAux.createTransaction();
-		displayClientAux.Display();
-		displayClientAux.closeTransaction();
+		TimeUnit.SECONDS.sleep(2);
+		try{
+			Client displayClient = new Client(args[0]);
+			ClientAux displayClientAux = new ClientAux(displayClient.serverIP, displayClient.serverPort);
+			displayClientAux.createTransaction();
+			displayClientAux.display();
+			displayClientAux.closeTransaction();
+		}catch(IOException e){
+			System.out.println("Error: " + e);
+		}catch(ClassNotFoundException e){
+			System.out.println("Error: " + e);
+		}
 	}
 }
