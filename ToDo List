@@ -1,6 +1,7 @@
-1. Create a Client Proxy to handle withdrawals and deposits
-2. Create an account class that holds a balance that can be read and written to
-3. Create the Data Manager with an array of account objects
-4. Create a lock class that holds lock types that locks and releases
-5. Create the Lock Manager to acquire and release all locks
-6. Create the Transaction Manager to connect the client between the other managers
+(X) Create a Client Proxy to handle withdrawals and deposits
+(X) Create an account class that holds a balance that can be read and written to
+(X) Create the Data Manager with an array of account objects
+(X) Create the Transaction Manager to connect the client between the other managers
+( ) Create a display method to display the accounts after the transactions are finished
+( ) Create a lock class that holds lock types that locks and releases
+( ) Create the Lock Manager to acquire and release all locks
