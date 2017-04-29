@@ -24,4 +24,12 @@ public class DataManager{	//Skeleton DataManager class
 		accountToWrite.writeBalance(balance);
 		return accountToWrite.readBalance();
 	}
+	public void display(){
+		int i = 0;
+		System.out.println("Accounts have the following balances:");
+		for(Account account : accountList){
+			System.out.println(i + ": has $" + account.readBalance());
+			i++;
+		}
+	}
 }

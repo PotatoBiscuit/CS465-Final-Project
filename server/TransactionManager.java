@@ -5,6 +5,7 @@ import static comm.MessageTypes.READ_REQUEST;
 import static comm.MessageTypes.WRITE_REQUEST;
 import static comm.MessageTypes.CREATE_TRANS;
 import static comm.MessageTypes.CLOSE_TRANS;
+import static comm.MessageTypes.DISPLAY;
 import comm.ConnectivityInfo;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -118,6 +119,9 @@ public class TransactionManager{
 								" has sent a close transaction request");
 							closeTransaction(Integer.parseInt(((Job) message.getContent()).getToolName()));
 							return;
+						case DISPLAY:
+							System.out.println("Display request sent");
+							dataManager.display();
 					}
 				}
 			}catch(IOException e){

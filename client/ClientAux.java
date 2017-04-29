@@ -53,7 +53,7 @@ public class ClientAux extends Thread implements MessageTypes{
 		writeToNet.writeObject(message);	//Sending message out to the application server
 		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
 		//--------------------------------------------
-		System.out.println("Balance before withdraw: " + balance);
+		System.out.println("Balance in account " + account.intValue() + " before withdraw: " + balance);
 		balance = balance - amount;
 				
 		//Create write request message
@@ -61,7 +61,7 @@ public class ClientAux extends Thread implements MessageTypes{
 				
 		writeToNet.writeObject(message);	//Sending message out to the application server
 		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
-		System.out.println("Balance after withdraw: " + balance);
+		System.out.println("Balance in account " + account.intValue() + " after withdraw: " + balance);
 		return amount;
 	}
 
@@ -74,7 +74,7 @@ public class ClientAux extends Thread implements MessageTypes{
 		writeToNet.writeObject(message);	//Sending message out to the application server
 		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
 		//--------------------------------------------
-		System.out.println("Balance before deposit: " + balance);
+		System.out.println("Balance in account " + account.intValue() + " before deposit: " + balance);
 		balance = balance + amount;
 				
 		//Create write request message
@@ -82,6 +82,6 @@ public class ClientAux extends Thread implements MessageTypes{
 				
 		writeToNet.writeObject(message);	//Sending message out to the application server
 		balance = ((Integer) readFromNet.readObject()).intValue();	//receive message back from server and store int value
-		System.out.println("Balance after deposit: " + balance);
+		System.out.println("Balance in account " + account.intValue() + " after deposit: " + balance);
 	}
 }

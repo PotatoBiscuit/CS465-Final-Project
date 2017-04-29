@@ -67,5 +67,10 @@ public class Client extends Thread implements MessageTypes{
 			}
 			//TimeUnit.SECONDS.sleep(2);
 		}
+		Client displayClient = new Client(args[0]);
+		ClientAux displayClientAux = new ClientAux(displayClient.serverIP, displayClient.serverPort);
+		displayClientAux.createTransaction();
+		displayClientAux.Display();
+		displayClientAux.closeTransaction();
 	}
 }
