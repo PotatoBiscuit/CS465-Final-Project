@@ -59,7 +59,7 @@ public class Client extends Thread implements MessageTypes{
 	}
 	
 	public static void main(String args[]) throws InterruptedException{
-		for(int i = 0; i < 10; i++){	//Create client threads that assault server with requests and messages
+		for(int i = 0; i < 5; i++){	//Create client threads that assault server with requests and messages
 			if(args.length == 1){
 				(new Client(args[0])).start();
 			}else{
@@ -67,7 +67,7 @@ public class Client extends Thread implements MessageTypes{
 			}
 			//TimeUnit.SECONDS.sleep(2);
 		}
-		TimeUnit.SECONDS.sleep(2);
+		TimeUnit.SECONDS.sleep(10);
 		try{
 			Client displayClient = new Client(args[0]);
 			ClientAux displayClientAux = new ClientAux(displayClient.serverIP, displayClient.serverPort);

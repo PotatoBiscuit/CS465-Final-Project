@@ -1,25 +1,27 @@
 package server;
 import comm.MessageTypes;
 import java.util.ArrayList;
+import static comm.MessageTypes.READ_LOCK;
+import static comm.MessageTypes.WRITE_LOCK;
 
 public class DataManager{	//Skeleton DataManager class
 	private ArrayList<Account> accountList;
 	private LockManager lockManager;
 	
-	public DataManager(){
+	public DataManager(LockManager lockManager){
 		accountList = new ArrayList<Account>();
 		for(int i = 0; i < 10; i++){
 			accountList.add(new Account(10));
 		}
-		lockManager = new LockManager();
+		this.lockManager = lockManager;
 	}
 		
 	public int readAccount(int transID, int accountNum){
-		//lockManager.lock(transID, accountNum, READ_LOCK);
+		lockManager.setLock(accountNum, transID, READ_LOCK);
 		return accountList.get(accountNum).readBalance();
 	}
 	public int writeAccount(int transID, int accountNum, int balance){
-		//lockManager.lock(transID, accountNum, WRITE_LOCK);
+		lockManager.setLock(accountNum, transID, WRITE_LOCK);
 		Account accountToWrite = accountList.get(accountNum);
 		accountToWrite.writeBalance(balance);
 		return accountToWrite.readBalance();

@@ -20,11 +20,12 @@ public class Lock {
 	public synchronized void acquire(int transID, int aLockType){
 		while (isConflict(transID, aLockType)){
 			try{
-				wait();			
+				wait();	
 			} catch (InterruptedException e){
 				System.out.println(e);			
 			}
 		}
+		
 		if (holders.isEmpty()){
 			holders.add(transID);
 			lockType = aLockType;					
@@ -34,17 +35,22 @@ public class Lock {
 		} else if (holders.indexOf(transID) != -1 && lockType == READ_LOCK && aLockType == WRITE_LOCK) {
 			lockType = aLockType;			
 		}
+		
+		if(aLockType == READ_LOCK)
+			System.out.println("Read lock on account: " + AccountNum + " for transaction: " + transID);
+		else
+			System.out.println("Write lock on account: " + AccountNum + " for transaction: " + transID);
 	}
 
 	public synchronized void release(int transID) {
-		holders.remove(transID);
+		holders.remove(Integer.valueOf(transID));
 		if (holders.isEmpty()){
 			lockType = EMPTY_LOCK;
 		}
 		notifyAll();
 	}
 
-	public synchronized boolean holds(int transID) {
+	public boolean holds(int transID) {
 		if (holders.indexOf(transID) != -1) {
 			return true;
 		}
@@ -52,13 +58,18 @@ public class Lock {
 	}
 
 	public synchronized boolean isConflict(int transID, int aLockType){
-		if (lockType == WRITE_LOCK && (aLockType == WRITE_LOCK || aLockType == READ_LOCK)) {
-			return false;
+		if (lockType == WRITE_LOCK && (aLockType == WRITE_LOCK || aLockType == READ_LOCK) && holders.indexOf(transID) == -1) {
+			if(aLockType == WRITE_LOCK)
+				System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a WRITE_LOCK on account: " + AccountNum + "\n");
+			else
+				System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a READ_LOCK on account: " + AccountNum + "\n");
+			return true;
 		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK && holders.indexOf(transID) != -1 && holders.size() == 1) {
-			return true;		
-		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK) {
 			return false;		
+		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK) {
+			System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a WRITE_LOCK on account: " + AccountNum + "\n");
+			return true;		
 		}
-		return true;
+		return false;
 	}
 }

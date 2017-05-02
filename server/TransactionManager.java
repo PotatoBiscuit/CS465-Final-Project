@@ -23,11 +23,13 @@ import java.lang.Math;
 
 public class TransactionManager{
 	ArrayList<Transaction> transactionList;
+	LockManager lockManager;
 	DataManager dataManager;
 	
 	public TransactionManager(){
+		lockManager = new LockManager();
 		transactionList = new ArrayList<Transaction>();
-		dataManager = new DataManager();
+		dataManager = new DataManager(lockManager);
 	}
 	
 	public synchronized int createTransaction(Socket client){	//Create transaction, add to transaction list
@@ -45,8 +47,7 @@ public class TransactionManager{
 	
 	public synchronized void closeTransaction(int transID){	//Close transaction, remove from list
 		transactionList.remove(findIndexById(transID));
-		//TO BE IMPLEMENTED, releasing locks
-		//lockManager.release(transID)
+		lockManager.unLock(transID);
 	}
 	
 	public int read(int transID, int accountNum){
