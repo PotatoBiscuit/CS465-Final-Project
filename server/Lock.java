@@ -20,8 +20,7 @@ public class Lock {
 	public synchronized void acquire(int transID, int aLockType){	//Set lock of type aLockType for transID
 		while (isConflict(transID, aLockType)){	//If there is a conflict, wait until a lock is released
 			try{
-				wait();	
-				System.out.println("MADE IT");
+				wait();
 			} catch (InterruptedException e){
 				System.out.println(e);			
 			}
@@ -31,17 +30,17 @@ public class Lock {
 		if (holders.isEmpty()){	//If no transactions currently hold this lock, add new transaction to array
 			holders.add(transID);
 			lockType = aLockType;	//And set lock type to the one specified in aLockType
-		} else if (holders.isEmpty() != true) {	//If there are other transactions holding lock
-			if (holders.indexOf(transID) == -1)	//And new transaction is not among them
-				holders.add(transID);			//Add transaction to holders array, but don't change lock type
-		} else if (holders.indexOf(transID) != -1 && lockType == READ_LOCK && aLockType == WRITE_LOCK) {
-			lockType = aLockType;			//If new transaction is only transaction, and it wants to set a write lock, do so
+		} else if (!holders.isEmpty() && holders.indexOf(transID) == -1) {	//If there are other transactions holding lock
+			//And new transaction is not among them
+			holders.add(transID);			//Add transaction to holders array, but don't change lock type
+		} else if (onlyHolder(transID) && lockType == READ_LOCK && aLockType == WRITE_LOCK) {
+			lockType = aLockType;			//If transaction wants to override its READ_LOCK with a WRITE_LOCK
 		}
 		
 		if(aLockType == READ_LOCK)
-			System.out.println("Read lock on account: " + AccountNum + " for transaction: " + transID);
+			System.out.println("READ_LOCK on account: " + AccountNum + " for transaction: " + transID);
 		else
-			System.out.println("Write lock on account: " + AccountNum + " for transaction: " + transID);
+			System.out.println("WRITE_LOCK on account: " + AccountNum + " for transaction: " + transID);
 	}
 
 	public synchronized void release(int transID) {	//Removes transaction from holders array
@@ -58,6 +57,13 @@ public class Lock {
 		}
 		return false;
 	}
+	
+	public boolean onlyHolder(int transID){	//See if transaction is the only holder of a lock
+		if(holders.indexOf(transID) != 1 && holders.size() == 1){
+			return true;
+		}
+		return false;
+	}
 
 	public synchronized boolean isConflict(int transID, int aLockType){	//Check to see if there is a lock conflict
 		//If transaction not in lock, and the lock type is currently a WRITE_LOCK, there is a conflict
@@ -66,10 +72,9 @@ public class Lock {
 				System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a WRITE_LOCK on account: " + AccountNum + "\n");
 			else
 				System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a READ_LOCK on account: " + AccountNum + "\n");
+			
 			return true;
-		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK && holders.indexOf(transID) != -1 && holders.size() == 1) {
-			return false;		//If lock type is currently READ_LOCK, and transaction wants to set WRITE_LOCK, no conflict if only transaction
-		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK) {
+		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK && !onlyHolder(transID)) {
 			System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a WRITE_LOCK on account: " + AccountNum + "\n");
 			return true;		//If lock type is READ_LOCK, and transaction wants WRITE_LOCK, but it is not the only transaction, is conflict
 		}
