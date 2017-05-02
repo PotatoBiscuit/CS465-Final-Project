@@ -22,14 +22,14 @@ import java.util.Random;
 import java.lang.Math;
 
 public class TransactionManager{
-	ArrayList<Transaction> transactionList;
-	LockManager lockManager;
-	DataManager dataManager;
+	ArrayList<Transaction> transactionList;	//Holds list of all transactions
+	LockManager lockManager;				//Holds lock manager
+	DataManager dataManager;				//Holds data manager
 	
 	public TransactionManager(){
-		lockManager = new LockManager();
-		transactionList = new ArrayList<Transaction>();
-		dataManager = new DataManager(lockManager);
+		lockManager = new LockManager();	//Create new lock manager
+		transactionList = new ArrayList<Transaction>();	//Create new transaction array
+		dataManager = new DataManager(lockManager);		//Create data manager, pass in lock manager
 	}
 	
 	public synchronized int createTransaction(Socket client){	//Create transaction, add to transaction list
@@ -41,7 +41,7 @@ public class TransactionManager{
 		}
 		Transaction newTransaction = new Transaction(client, transID);
 		transactionList.add(newTransaction);
-		newTransaction.start();
+		newTransaction.start();	//Run transaction thread
 		return transID;	//Return transaction ID to later be returned to the client
 	}
 	
@@ -50,15 +50,15 @@ public class TransactionManager{
 		lockManager.unLock(transID);
 	}
 	
-	public int read(int transID, int accountNum){
+	public int read(int transID, int accountNum){	//Use data manager to read from specified account
 		return dataManager.readAccount(transID, accountNum);
 	}
 	
-	public int write(int transID, int accountNum, int balance){
+	public int write(int transID, int accountNum, int balance){	//Use data manager to write to specified account
 		return dataManager.writeAccount(transID, accountNum, balance);
 	}
 	
-	public int findIndexById(int transID){
+	public int findIndexById(int transID){	//Find transaction in transaction array (by ID)
 		int index = 0;
 		for(Transaction temp : transactionList){
 			if(temp.transID == transID){
@@ -70,18 +70,18 @@ public class TransactionManager{
 	}
 	
 	private class Transaction extends Thread{
-		public Socket clientSocket;
-		public int transID;
-		public ObjectInputStream readFromNet;
-		public ObjectOutputStream writeToNet;
-		public Message message;
+		public Socket clientSocket;		//Holds socket to client thread
+		public int transID;				//Holds transaction ID
+		public ObjectInputStream readFromNet;	//Read stream from client
+		public ObjectOutputStream writeToNet;	//Write stream to client
+		public Message message;					//Holds current message to send to client
 		
-		public Transaction(Socket clientSocket, int transID){
+		public Transaction(Socket clientSocket, int transID){	//Create transaction, store transaction ID, and client thread socket
 			this.clientSocket = clientSocket;
 			this.transID = transID;
 			
 			try{
-				readFromNet = new ObjectInputStream(clientSocket.getInputStream());
+				readFromNet = new ObjectInputStream(clientSocket.getInputStream());	//Create input/output streams
 				writeToNet = new ObjectOutputStream(clientSocket.getOutputStream());
 			}catch(IOException e){
 				System.err.println("Error: " + e);
@@ -90,7 +90,7 @@ public class TransactionManager{
 		
 		public void run(){
 			System.out.println("Trans: " + transID + " created!");
-			try{	//Open input and output streams to client
+			try{
 				int balance = 0;
 				while(true){
 					message = (Message) readFromNet.readObject();	//Read client message
@@ -100,27 +100,27 @@ public class TransactionManager{
 								" has sent a read request for account: " +
 								((Integer) ((Job) message.getContent()).getParameters()).intValue());
 							balance = read(transID, ((Integer) ((Job) message.getContent()).getParameters()).intValue());
-							writeToNet.writeObject(new Integer(balance));
+							writeToNet.writeObject(new Integer(balance));	//Return balance read
 							break;
-						case WRITE_REQUEST:	//If write request, perform read on the specified account
+						case WRITE_REQUEST:	//If write request, perform write on the specified account, with specified balance
 							System.out.println("Client " + ((Job) message.getContent()).getToolName() + 
 								" has sent a write request for account: " +
 								((Integer) ((Job) message.getContent()).getParameters()).intValue());
 							balance = write(transID, ((Integer) ((Job) message.getContent()).getParameters()).intValue(),
 												((Integer) ((Job) message.getContent()).getParameters1()).intValue());
-							writeToNet.writeObject(new Integer(balance));
+							writeToNet.writeObject(new Integer(balance));	//Return new balance
 							break;
 						case CREATE_TRANS:	//If request to open transaction, give client a new Transaction ID
 							Integer response = new Integer(transID);
 							System.out.println("A client has sent an open transaction request. ID: " + response.intValue());
 							writeToNet.writeObject(response);
 							break;
-						case CLOSE_TRANS:	//If request to close transaction, remove transaction from server
+						case CLOSE_TRANS:	//If request to close transaction, remove transaction from trans manager, quit thread
 							System.out.println("Client " + ((Job) message.getContent()).getToolName() +
 								" has sent a close transaction request");
 							closeTransaction(Integer.parseInt(((Job) message.getContent()).getToolName()));
 							return;
-						case DISPLAY:
+						case DISPLAY:		//If request is display, display all account information on server
 							System.out.println("Display request sent");
 							dataManager.display();
 					}

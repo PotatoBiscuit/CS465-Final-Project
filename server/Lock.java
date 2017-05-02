@@ -7,18 +7,18 @@ import static comm.MessageTypes.WRITE_LOCK;
 import java.util.ArrayList;
 
 public class Lock {
-	private int AccountNum;
-	private ArrayList holders;
-	private int lockType;
+	private int AccountNum;		//Account this lock locks
+	private ArrayList holders;	//List of all transactions holding this lock
+	private int lockType;	//Hold current type of lock
 
-	public Lock (int num) {
+	public Lock (int num) {	//Create lock, and specify Account Number it locks
 		AccountNum = num;
-		holders = new ArrayList();
-		lockType = EMPTY_LOCK;
+		holders = new ArrayList();	//Create array of transactions holding lock
+		lockType = EMPTY_LOCK;		//Set lockType to EMPTY_LOCK
 	}
 
-	public synchronized void acquire(int transID, int aLockType){
-		while (isConflict(transID, aLockType)){
+	public synchronized void acquire(int transID, int aLockType){	//Set lock of type aLockType for transID
+		while (isConflict(transID, aLockType)){	//If there is a conflict, wait until a lock is released
 			try{
 				wait();	
 			} catch (InterruptedException e){
@@ -26,14 +26,15 @@ public class Lock {
 			}
 		}
 		
-		if (holders.isEmpty()){
+		//If no conflict...
+		if (holders.isEmpty()){	//If no transactions currently hold this lock, add new transaction to array
 			holders.add(transID);
-			lockType = aLockType;					
-		} else if (holders.isEmpty() != true) {
-			if (holders.indexOf(transID) == -1)
-				holders.add(transID);
+			lockType = aLockType;	//And set lock type to the one specified in aLockType
+		} else if (holders.isEmpty() != true) {	//If there are other transactions holding lock
+			if (holders.indexOf(transID) == -1)	//And new transaction is not among them
+				holders.add(transID);			//Add transaction to holders array, but don't change lock type
 		} else if (holders.indexOf(transID) != -1 && lockType == READ_LOCK && aLockType == WRITE_LOCK) {
-			lockType = aLockType;			
+			lockType = aLockType;			//If new transaction is only transaction, and it wants to set a write lock, do so
 		}
 		
 		if(aLockType == READ_LOCK)
@@ -42,22 +43,23 @@ public class Lock {
 			System.out.println("Write lock on account: " + AccountNum + " for transaction: " + transID);
 	}
 
-	public synchronized void release(int transID) {
+	public synchronized void release(int transID) {	//Removes transaction from holders array
 		holders.remove(Integer.valueOf(transID));
-		if (holders.isEmpty()){
+		if (holders.isEmpty()){	//If holders is empty, set lock type to EMPTY_LOCK
 			lockType = EMPTY_LOCK;
 		}
-		notifyAll();
+		notifyAll();			//Notify all wait() functions called
 	}
 
-	public boolean holds(int transID) {
-		if (holders.indexOf(transID) != -1) {
+	public boolean holds(int transID) {	//See if lock is held by given transaction
+		if (holders.indexOf(transID) != -1) {	//If yes, return true
 			return true;
 		}
 		return false;
 	}
 
-	public synchronized boolean isConflict(int transID, int aLockType){
+	public synchronized boolean isConflict(int transID, int aLockType){	//Check to see if there is a lock conflict
+		//If transaction not in lock, and the lock type is currently a WRITE_LOCK, there is a conflict
 		if (lockType == WRITE_LOCK && (aLockType == WRITE_LOCK || aLockType == READ_LOCK) && holders.indexOf(transID) == -1) {
 			if(aLockType == WRITE_LOCK)
 				System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a WRITE_LOCK on account: " + AccountNum + "\n");
@@ -65,11 +67,11 @@ public class Lock {
 				System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a READ_LOCK on account: " + AccountNum + "\n");
 			return true;
 		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK && holders.indexOf(transID) != -1 && holders.size() == 1) {
-			return false;		
+			return false;		//If lock type is currently READ_LOCK, and transaction wants to set WRITE_LOCK, no conflict if only transaction
 		} else if (lockType == READ_LOCK && aLockType == WRITE_LOCK) {
 			System.out.println("\nCONFLICT DETECTED! Trans: " + transID + " couldn't place a WRITE_LOCK on account: " + AccountNum + "\n");
-			return true;		
+			return true;		//If lock type is READ_LOCK, and transaction wants WRITE_LOCK, but it is not the only transaction, is conflict
 		}
-		return false;
+		return false;			//If all tests pass, there is no conflict
 	}
 }

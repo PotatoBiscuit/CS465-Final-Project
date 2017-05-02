@@ -20,7 +20,7 @@ public class Client extends Thread implements MessageTypes{
 	
 	public Client(String serverPropertiesFile){	//Gather server info connection data
 		try{
-			// read server port from server properties file
+			// read server port and IP from server properties file
 			BufferedReader serverFile = new BufferedReader(new FileReader(serverPropertiesFile));
 			serverIP = serverFile.readLine().split(":")[1].trim();
 			serverPort = Integer.parseInt(serverFile.readLine().split(":")[1].trim());
@@ -31,26 +31,28 @@ public class Client extends Thread implements MessageTypes{
 	}
 	
 	public void run(){
-		Integer drawAccount;
+		Integer drawAccount;	//Account numbers to be withdrawn from and deposited to
 		Integer depositAccount;
 		try { 
-           		ClientAux clientInterface = new ClientAux(serverIP, serverPort);
-			clientInterface.createTransaction();
+			//Create ClientAux object to perform open trans, withdraw, deposit, close trans
+           	ClientAux clientInterface = new ClientAux(serverIP, serverPort);
+			clientInterface.createTransaction();	//Create transaction
 			
 			Random generator = new Random();	//Randomly generate an account to withdraw from
-			drawAccount = new Integer(Math.abs(generator.nextInt() % 10));
+			drawAccount = new Integer(Math.abs(generator.nextInt() % 10));	//Number from 0-9
 
-			int withdrawal = Math.abs(generator.nextInt() % 25);
+			int withdrawal = Math.abs(generator.nextInt() % 25);			//Number from 0-24
+			//Withdraw randomly selected amount from randomly selected account
 			int amount = clientInterface.Withdraw(withdrawal, drawAccount);
 
-			while (true){
+			while (true){	//Get the account number to deposit to, cannot be the same as account withdrawn from
 				depositAccount = new Integer(Math.abs(generator.nextInt() % 10));
 				if (depositAccount.intValue() != drawAccount.intValue())
 					break;		
 			}
-			clientInterface.Deposit(amount, depositAccount);
+			clientInterface.Deposit(amount, depositAccount);	//Deposit amount to selected deposit account
 
-			clientInterface.closeTransaction();
+			clientInterface.closeTransaction();					//Close transaction
 			
 		}catch (Exception ex) {
             		System.err.println("[PlusOneClient.run] Error occurred");
@@ -67,8 +69,8 @@ public class Client extends Thread implements MessageTypes{
 			}
 			//TimeUnit.SECONDS.sleep(2);
 		}
-		TimeUnit.SECONDS.sleep(10);
-		try{
+		TimeUnit.SECONDS.sleep(5);
+		try{	//Create a special client to ask server to display account info
 			Client displayClient = new Client(args[0]);
 			ClientAux displayClientAux = new ClientAux(displayClient.serverIP, displayClient.serverPort);
 			displayClientAux.createTransaction();
