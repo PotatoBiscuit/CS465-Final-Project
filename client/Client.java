@@ -61,12 +61,12 @@ public class Client extends Thread implements MessageTypes{
 	}
 	
 	public static void main(String args[]) throws InterruptedException{
-		for(int i = 0; i < 5; i++){	//Create client threads that assault server with requests and messages
-			if(args.length == 1){
-				(new Client(args[0])).start();
-			}else{
-				System.err.println("No server.properties files given");
-			}
+		if(args.length < 2){
+			System.err.println("Incorrect number of arguments");
+			return;
+		} 
+		for(int i = 0; i < Integer.parseInt(args[1]); i++){	//Create client threads that assault server with requests and messages
+			(new Client(args[0])).start();					//Based on user input for number of client threads
 			//TimeUnit.SECONDS.sleep(2);
 		}
 		TimeUnit.SECONDS.sleep(5);

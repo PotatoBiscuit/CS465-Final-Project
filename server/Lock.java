@@ -21,6 +21,7 @@ public class Lock {
 		while (isConflict(transID, aLockType)){	//If there is a conflict, wait until a lock is released
 			try{
 				wait();	
+				System.out.println("MADE IT");
 			} catch (InterruptedException e){
 				System.out.println(e);			
 			}
