@@ -7,20 +7,24 @@ import static comm.MessageTypes.WRITE_LOCK;
 import java.util.ArrayList;
 
 public class Lock {
-	private int AccountNum;		//Account this lock locks
-	private ArrayList holders;	//List of all transactions holding this lock
-	private int lockType;	//Hold current type of lock
+	public int AccountNum;		//Account this lock locks
+	public ArrayList holders;	//List of all transactions holding this lock
+	public ArrayList waitList;
+	public int lockType;	//Hold current type of lock
 
 	public Lock (int num) {	//Create lock, and specify Account Number it locks
 		AccountNum = num;
 		holders = new ArrayList();	//Create array of transactions holding lock
+		waitList = new ArrayList();
 		lockType = EMPTY_LOCK;		//Set lockType to EMPTY_LOCK
 	}
 
 	public synchronized void acquire(int transID, int aLockType){	//Set lock of type aLockType for transID
 		while (isConflict(transID, aLockType)){	//If there is a conflict, wait until a lock is released
 			try{
+				waitList.add(transID);
 				wait();
+				waitList.remove(Integer.valueOf(transID));
 			} catch (InterruptedException e){
 				System.out.println(e);			
 			}

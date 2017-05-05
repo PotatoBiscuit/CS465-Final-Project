@@ -33,5 +33,6 @@ public class DataManager{
 			System.out.println(i + ": has $" + account.readBalance());
 			i++;
 		}
+		lockManager.deadlockDisplay();
 	}
 }

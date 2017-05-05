@@ -1,6 +1,9 @@
 package server;
 
 import java.util.*;
+import static comm.MessageTypes.EMPTY_LOCK;
+import static comm.MessageTypes.READ_LOCK;
+import static comm.MessageTypes.WRITE_LOCK;
 
 public class LockManager{
 	private Hashtable allLocks;	//A hashtable of all existing locks
@@ -28,5 +31,23 @@ public class LockManager{
 			if(tempLock.holds(transID)) tempLock.release(transID);	//If the lock was set by transID release it
 		}
 		System.out.println("Unlocking complete for " + transID);
+	}
+	
+	public void deadlockDisplay(){	//Displays current locks held causing of deadlock
+		System.out.println("\n------------Deadlock Info-------------");
+		Enumeration e = allLocks.elements();
+		while(e.hasMoreElements()){
+			Lock tempLock = (Lock) e.nextElement();
+			if(tempLock.lockType == READ_LOCK){
+				System.out.print("READ_LOCK");
+			}else if(tempLock.lockType == WRITE_LOCK){
+				System.out.print("WRITE_LOCK");
+			}else{
+				continue;
+			}
+			System.out.print(" on account " + tempLock.AccountNum + " held by " + Arrays.toString(tempLock.holders.toArray())
+			+ " blocking transactions: ");
+			System.out.println(Arrays.toString(tempLock.waitList.toArray()));
+		}
 	}
 }
